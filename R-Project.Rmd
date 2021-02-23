@@ -18,7 +18,7 @@ As a statistical consultant working for a real estate investment firm, your task
 In order to better assess the quality of the model you will produce, the data have been randomly divided into three separate pieces: a training data set, a testing data set, and a validation data set. For now we will load the training data set, the others will be loaded and used later.
 
 ```{r load, message = FALSE}
-load("/home/hadoop/Desktop/FinalDataAnalysis/ames_train.Rdata")
+load("ames_train.Rdata")
 ```
 
 ```{r}
@@ -64,11 +64,11 @@ dplyr::select(ames_train, contains("price"))
 ```
 
 ```{r}
-head(ames_train, n = 6)
+head(ames_train, n = 8)
 ```
 
 ```{r}
-tail(ames_train)
+tail(ames_train, n=8)
 ```
 
 ```{r}
@@ -94,25 +94,7 @@ summary(ames_train)
 ```
 
 ```{r}
-ames_train %>% dplyr::select(Pool.QC, Fence, Misc.Feature) %>% filter(!is.na(Misc.Feature))
-```
-
-
-Removing the variables that have most of NA's and we see no reason to include them in our dataset
-
-NA's: 997 / 1000
-
-```{r}
-(ames_clean <- ames_train %>% dplyr::select(-Pool.QC))
-```
-
-```{r}
-summary(ames_train$MS.SubClass)
-```
-
-
-```{r}
-count(ames_train, MS.SubClass)
+ames_train %>% dplyr::select(Pool.QC, Fence, Misc.Feature) %>% filter(is.na(Misc.Feature),!is.na(Pool.QC))
 ```
 
 
@@ -136,18 +118,23 @@ str(ames_train$Overall.Cond)
 str(ames_train$Overall.Qual)
 ```
 
+```{r}
+count(ames_train, Overall.Qual)
+```
+
+
 Convert the above three variables to factors:
 
 ```{r}
-(ames_clean <- ames_clean %>% mutate(MS.SubClass = as.factor(MS.SubClass), Overall.Qual = as.factor(Overall.Qual), Overall.Cond = as.factor(Overall.Cond)))
+(ames_train <- ames_train %>% mutate(MS.SubClass = as.factor(MS.SubClass), Overall.Qual = as.factor(Overall.Qual), Overall.Cond = as.factor(Overall.Cond)))
 ```
 
 ```{r}
-str(ames_clean$MS.SubClass)
+str(ames_train$MS.SubClass)
 ```
 
 ```{r}
-count(ames_clean, MS.SubClass)
+count(ames_train, MS.SubClass)
 ```
 
 Transformation of NA's to a new category will avoid bias in the data and the modelling by removing data from the dataset.
@@ -157,16 +144,16 @@ Lot.Frontage variable is a continuous variable which has 167 NA's (missing data)
 But other variables such as , Alley, Bsmt.Qual, Bsmt.Cond, Bsmt.Exposure, BsmtFin.Type.1, BsmtFin.Type.2, Fireplace.Qu, Garage.Type, Garage.Finish,Garage.Qual,Garage.Cond,Pool.QC, Fence, Misc.Feature are categorical variables which has NA's that should be converted to a new category.
 
 ```{r}
-ames_clean %>% count(Alley)
+ames_train%>% count(Alley)
 ```
 
 ```{r}
-str(ames_clean$Alley)
+str(ames_train$Alley)
 ```
 
 
 ```{r}
-ames_clean %>% mutate(Alley = if_else(is.na(Alley), 'No Alley', as.character(Alley))) %>% count(Alley)
+ames_train %>% mutate(Alley = if_else(is.na(Alley), 'No Alley', as.character(Alley))) %>% count(Alley)
 ```
 
 ```{r}
@@ -189,24 +176,6 @@ ames_train <- ames_train %>% mutate(
 )
 ```
 
-```{r}
-summary(ames_train)
-```
-
-```{r}
-ames_train %>% dplyr::select(Year.Built,Garage.Yr.Blt, everything())
-```
-
-```{r}
-ames_train %>% count(Garage.Yr.Blt)
-```
-
-```{r}
-ames_train %>% dplyr::select(Year.Built, Garage.Yr.Blt) %>% filter(is.na(Garage.Yr.Blt))
-```
 
 
 
-```{r}
-ames_train %>% mutate(Garage.Yr.Blt = if_else(is.na(Garage.Yr.Blt),Year.Built, Garage.Yr.Blt)) %>% dplyr::select(Year.Built, Garage.Yr.Blt, everything()) %>% count(Garage.Yr.Blt)
-```
